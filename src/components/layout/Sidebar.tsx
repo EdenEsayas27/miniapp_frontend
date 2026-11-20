@@ -105,7 +105,7 @@ export default function Sidebar({
       {/* Header */}
       <div className={['flex items-center h-[var(--topnav-h)] shrink-0 px-4 border-b border-[var(--sidebar-border)]', collapsed ? 'justify-center' : 'gap-3'].join(' ')}>
         <div className="w-8 h-8 rounded-xl overflow-hidden shrink-0 flex items-center justify-center">
-          <img src="/zBank-icon.png" alt={brandName} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = '/zemen-logo.png' }} />
+          <img src="/miniapp/zemen-logo.png" alt={brandName} className="w-full h-full object-contain" />
         </div>
         {!collapsed && (
           <div className="min-w-0 flex-1">

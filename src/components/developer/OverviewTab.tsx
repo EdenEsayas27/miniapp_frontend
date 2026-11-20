@@ -22,7 +22,6 @@ import {
   Check,
   AlertTriangle,
   ArrowUpRight,
-  Send,
   Clock,
   XCircle,
 } from 'lucide-react';
@@ -98,14 +97,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ app, onNavigateTab }) 
             Endpoint Reference
           </button>
 
-          <button
-            type="button"
-            onClick={() => onNavigateTab('webhooks')}
-            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-xs inline-flex items-center gap-2 transition-colors cursor-pointer"
-          >
-            <Send className="w-3.5 h-3.5" />
-            Super App Callbacks
-          </button>
+
         </div>
       </div>
 
@@ -531,10 +523,10 @@ window.ZemenPay.requestPayment(paymentToken)
               </div>
               <button
                 type="button"
-                onClick={() => onNavigateTab('webhooks')}
+                onClick={() => onNavigateTab('docs')}
                 className="text-xs font-bold text-emerald-800 hover:underline inline-flex items-center gap-1 cursor-pointer shrink-0"
               >
-                Inspect Callbacks &amp; Failure Codes <ArrowRight className="w-3.5 h-3.5" />
+                View Endpoint Reference <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -611,25 +603,7 @@ window.ZemenPay.requestPayment(paymentToken)
             </div>
           </div>
 
-          {/* Tool 4 */}
-          <div
-            onClick={() => onNavigateTab('webhooks')}
-            className="p-4 bg-white border border-slate-200 hover:border-slate-300 hover:shadow-xs rounded-xl transition-all cursor-pointer flex flex-col justify-between"
-          >
-            <div className="space-y-2">
-              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
-                <Send className="w-4 h-4" />
-              </div>
-              <h3 className="text-xs font-bold text-[var(--text)]">Callbacks &amp; Webhooks</h3>
-              <p className="text-[11px] text-[var(--text-3)] leading-relaxed">
-                Test the live webhook dispatcher, inspect async payload schemas, and simulate server responses for all failure codes.
-              </p>
-            </div>
-            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-emerald-700">
-              <span>View Callback Schemas</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </div>
-          </div>
+
         </div>
       </div>
     </div>

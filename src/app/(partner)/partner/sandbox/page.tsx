@@ -2,16 +2,16 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Terminal, Smartphone, Code2, Send, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Terminal, Smartphone, Code2, RefreshCw, AlertTriangle } from 'lucide-react';
 import { AdminApiService } from '@/services/api';
 import { MiniAppAdmin } from '@/types/miniapp';
 import { useAuthStore } from '@/store/authStore';
 import { ApiSandbox } from '@/components/developer/ApiSandbox';
 import { SignaturePlayground } from '@/components/developer/SignaturePlayground';
-import { WebhooksTab } from '@/components/developer/WebhooksTab';
+
 import { DEMO_APP } from '@/app/developer/page';
 
-type SandboxTab = 'sandbox' | 'hmac' | 'webhooks';
+type SandboxTab = 'sandbox' | 'hmac';
 
 export default function PartnerSandboxPage() {
   const router = useRouter();
@@ -65,7 +65,6 @@ export default function PartnerSandboxPage() {
   const tabs = [
     { id: 'sandbox' as SandboxTab, label: 'API Sandbox', icon: Terminal, desc: `Interactive tester with ${app.name} credentials` },
     { id: 'hmac' as SandboxTab, label: 'HMAC Playground', icon: Code2, desc: 'Signature calculation with your private key' },
-    { id: 'webhooks' as SandboxTab, label: 'Callbacks Spec', icon: Send, desc: 'Payment notification webhook schema' },
   ];
 
   return (
@@ -129,9 +128,7 @@ export default function PartnerSandboxPage() {
           />
         )}
 
-        {activeTab === 'webhooks' && (
-          <WebhooksTab app={app} />
-        )}
+
       </div>
     </div>
   );

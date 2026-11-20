@@ -1,6 +1,6 @@
 import { MiniAppAdmin, Category, CreateMiniAppPayload, UpdateMiniAppPayload, StatusUpdatePayload, MiniAppTransaction } from '../types/miniapp';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5164';
+const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5164').replace(/\/+$/, '');
 
 // Helper to normalize PascalCase C# responses into camelCase TypeScript models
 function normalizeTransaction(raw: any): MiniAppTransaction {

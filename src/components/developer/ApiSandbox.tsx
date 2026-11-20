@@ -33,12 +33,12 @@ import { AdminApiService } from '@/services/api';
 
 interface ApiSandboxProps {
   app: MiniAppAdmin;
-  onGoToSimulator?: (paymentToken?: string) => void;
+
   onRequestGoLive?: () => void;
   onGoToTransactions?: () => void;
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5164';
+const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5164').replace(/\/+$/, '');
 
 type EndpointId = 'generateToken' | 'validate' | 'samplePayment' | 'payment';
 
@@ -305,7 +305,6 @@ const ENDPOINTS: EndpointConfig[] = [
 
 export const ApiSandbox: React.FC<ApiSandboxProps> = ({
   app,
-  onGoToSimulator,
   onRequestGoLive,
   onGoToTransactions,
 }) => {

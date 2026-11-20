@@ -290,7 +290,7 @@ export const GoLiveTab: React.FC<GoLiveTabProps> = ({ app, onRefreshApp, onNavig
               {app.holdingAccount || 'Not Configured'}
             </code>
             <p className="text-[11px] text-slate-500">
-              Core Banking (FlexCube) account where all customer payments are credited.
+              Zemen Bank account where all customer payments are credited.
             </p>
           </div>
 

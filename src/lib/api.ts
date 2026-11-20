@@ -5,7 +5,7 @@
  *  - On 401, clears the auth store and redirects to /login
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5164'
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5164').replace(/\/+$/, '')
 const STORAGE_KEY = 'zemen-miniapp-auth'
 
 function getToken(): string | null {
@@ -55,7 +55,7 @@ export async function apiFetch<T = unknown>(
   if (response.status === 401) {
     clearAuth()
     if (typeof window !== 'undefined') {
-      window.location.href = '/login'
+      window.location.href = '/miniapp/login'
     }
     throw new Error('Unauthorized')
   }

@@ -24,7 +24,7 @@ interface AuthState {
   setUser: (user: PortalUser | null) => void
 }
 
-const API_BASE = 'http://localhost:5164'
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5164').replace(/\/+$/, '')
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -68,7 +68,7 @@ export const useAuthStore = create<AuthState>()(
           set({ user, token: data.token ?? null })
           return { success: true }
         } catch {
-          return { success: false, error: 'Unable to reach the server. Is the backend running on port 5164?' }
+          return { success: false, error: 'Unable to reach the server. Please check your connection and try again.' }
         }
       },
 

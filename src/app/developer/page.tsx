@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
-  BookOpen, Terminal, Smartphone, Code2, Send, Layers,
+  BookOpen, Terminal, Smartphone, Code2, Layers,
   ArrowLeft, Moon, Sun, Menu, X, ShieldCheck,
   AlertCircle, RefreshCw,
 } from 'lucide-react';
@@ -12,7 +12,7 @@ import { MiniAppAdmin } from '@/types/miniapp';
 import { OverviewTab } from '@/components/developer/OverviewTab';
 import { ApiSandbox } from '@/components/developer/ApiSandbox';
 import { SignaturePlayground } from '@/components/developer/SignaturePlayground';
-import { WebhooksTab } from '@/components/developer/WebhooksTab';
+
 import { useThemeStore } from '@/store/themeStore';
 
 export const DEMO_APP: MiniAppAdmin = {
@@ -36,14 +36,13 @@ export const DEMO_APP: MiniAppAdmin = {
   updatedAt: '2026-11-18T00:00:00Z',
 };
 
-type TabKey = 'overview' | 'sandbox' | 'playground' | 'docs' | 'webhooks';
+type TabKey = 'overview' | 'sandbox' | 'playground' | 'docs';
 
 const NAV_TABS = [
   { key: 'overview'   as TabKey, label: 'Overview',           icon: BookOpen, desc: 'Integration architecture and onboarding guide' },
   { key: 'sandbox'    as TabKey, label: 'API Sandbox',        icon: Terminal, desc: 'Interactive endpoint tester with live HMAC verification' },
   { key: 'playground' as TabKey, label: 'HMAC Playground',   icon: Code2,    desc: 'HMAC-SHA256 signature generator and code snippets' },
   { key: 'docs'       as TabKey, label: 'Endpoint Reference', icon: Layers,   desc: 'Complete docs for /Validate, /Payment, and error codes' },
-  { key: 'webhooks'   as TabKey, label: 'Super App Callbacks',icon: Send,     desc: 'Async payment callback schema and failure codes' },
 ];
 
 export default function DeveloperPortalPage() {
@@ -187,8 +186,8 @@ export default function DeveloperPortalPage() {
               {activeTab === 'sandbox' && (
                 <ApiSandbox
                   app={app}
-                  onRequestGoLive={() => { window.location.href = '/login'; }}
-                  onGoToTransactions={() => { window.location.href = '/login'; }}
+                  onRequestGoLive={() => { window.location.href = '/miniapp/login'; }}
+                  onGoToTransactions={() => { window.location.href = '/miniapp/login'; }}
                 />
               )}
               {activeTab === 'playground' && (
@@ -201,9 +200,7 @@ export default function DeveloperPortalPage() {
               {activeTab === 'docs' && (
                 <EndpointsReferenceTab app={app} onTryEndpoint={() => setActiveTab('sandbox')} />
               )}
-              {activeTab === 'webhooks' && (
-                <WebhooksTab app={app} />
-              )}
+
             </div>
           )}
         </main>
@@ -214,7 +211,7 @@ export default function DeveloperPortalPage() {
 
 /* ── Endpoints Reference (inline, public-safe) ── */
 function EndpointsReferenceTab({ app, onTryEndpoint }: { app: MiniAppAdmin; onTryEndpoint: () => void }) {
-  const BASE = 'http://localhost:5164';
+  const BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5164').replace(/\/+$/, '');
 
   const endpoints = [
     {
