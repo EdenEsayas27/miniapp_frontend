@@ -54,7 +54,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col items-center mb-8 gap-3">
               <div className="h-14 w-auto flex items-center justify-center overflow-hidden">
-                <img src="/zemen-logo.png" alt="Zemen Bank" className="h-full w-auto" />
+                <img src="/miniapp/zemen-logo.png" alt="Zemen Bank" className="h-full w-auto" />
               </div>
               <div className="text-center animate-in animate-in-d1">
                 <h1 className="f-display font-bold text-xl text-[var(--text)]">Dev Portal Dashboard</h1>

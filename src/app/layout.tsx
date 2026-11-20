@@ -5,6 +5,11 @@ import { Providers } from './providers'
 export const metadata: Metadata = {
   title: 'Zemen Bank Developer Portal',
   description: 'Mini-App Integration Platform for Zemen Bank Super App',
+  icons: {
+    icon: '/miniapp/zemenfavicon.png',
+    shortcut: '/miniapp/zemenfavicon.png',
+    apple: '/miniapp/zemenfavicon.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
