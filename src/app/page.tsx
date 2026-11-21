@@ -4,40 +4,12 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import {
   ArrowRight, Menu, X, Check, Zap, Shield, Globe, Code,
-  CheckCircle2, Moon, Sun, Terminal, Smartphone, Key,
-  type LucideIcon,
+  CheckCircle2, Moon, Sun, Terminal, Key,
+  Bus, Receipt, Ticket, GraduationCap, HeartPulse, Smartphone, ShoppingBag, Coffee, Store,
 } from 'lucide-react'
 import { useThemeStore } from '@/store/themeStore'
 
-/* ── Status chip types ── */
-type Status = 'accepted' | 'success' | 'failed' | 'cancelled' | 'expired'
-type ScenarioKey = 'success' | 'failed' | 'cancelled' | 'expired'
-
-const SCENARIOS: Record<ScenarioKey, Status[]> = {
-  success:   ['accepted', 'success'],
-  failed:    ['accepted', 'failed'],
-  cancelled: ['accepted', 'cancelled'],
-  expired:   ['accepted', 'expired'],
-}
-const SCENARIO_ORDER: ScenarioKey[] = ['success', 'failed', 'cancelled', 'expired']
-const SCENARIO_COPY: Record<ScenarioKey, { title: string; blurb: string }> = {
-  success:   { title: 'Customer approves',  blurb: 'Happy path. PIN accepted, funds confirmed.' },
-  failed:    { title: 'Issuer declines',    blurb: 'The bank rejects the payment. See failure_code.' },
-  cancelled: { title: 'Customer cancels',   blurb: 'The customer cancels the payment on their phone.' },
-  expired:   { title: 'Customer walks away',blurb: 'The prompt expires before the customer completes it.' },
-}
-const STATUS_LABEL: Record<Status, string> = {
-  accepted: 'Accepted', success: 'Success', failed: 'Failed', cancelled: 'Cancelled', expired: 'Expired',
-}
-const STATUS_HINT: Record<Status, string> = {
-  accepted: 'In progress. Wait for the callback.',
-  success:  'Paid.',
-  failed:   'Not paid. See failure_code.',
-  cancelled:'The customer cancelled.',
-  expired:  'The customer did not complete the payment in time.',
-}
-const TERMINAL: Status[] = ['success', 'failed', 'cancelled', 'expired']
-
+/* ── Floating Background Badges ── */
 const FLOATING_REFS = [
   { key: 1, t: 'Zemen Bank', l: '4%',  top: '62%', d: '0s'   },
   { key: 2, t: 'Zemen Bank', l: '14%', top: '82%', d: '2.2s' },
@@ -73,112 +45,87 @@ function useInView<T extends HTMLElement>() {
   return { ref, seen }
 }
 
-/* ── Components ── */
-function StatusChip({ status, pulse = false }: { status: Status; pulse?: boolean }) {
-  return (
-    <span
-      className="f-mono inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap"
-      style={{ background: `var(--status-${status}-bg)`, color: `var(--status-${status}-color)` }}
-    >
-      <span className={`w-1.5 h-1.5 rounded-full bg-current ${pulse ? 'pg-pulse' : ''}`} />
-      {STATUS_LABEL[status]}
-    </span>
-  )
-}
-
-function Ring({ pct, color, shake }: { pct: number; color: string; shake: boolean }) {
-  return (
-    <svg viewBox="0 0 120 120" className={`w-full h-full ${shake ? 'pg-shake' : ''}`} aria-hidden="true">
-      <g transform="rotate(-90 60 60)">
-        <circle cx="60" cy="60" r="52" pathLength={100} fill="none" stroke="var(--border-strong)" strokeWidth="1.5" strokeDasharray="22 3" />
-        <circle cx="60" cy="60" r="52" pathLength={100} fill="none" stroke={color} strokeWidth="4" strokeLinecap="round"
-          strokeDasharray={`${pct} 100`} style={{ transition: 'stroke-dasharray .9s cubic-bezier(.16,1,.3,1), stroke .4s' }} />
-      </g>
-    </svg>
-  )
-}
-
-function ringState(status: Status, idx: number) {
-  switch (status) {
-    case 'success':   return { pct: 100, color: 'var(--status-success-color)',   shake: false }
-    case 'failed':    return { pct: 72,  color: 'var(--status-failed-color)',    shake: true  }
-    case 'cancelled': return { pct: 90,  color: 'var(--status-failed-color)',    shake: false }
-    case 'expired':   return { pct: 54,  color: 'var(--status-timeout-color)',   shake: false }
-    default:          return { pct: (idx + 1) * 18, color: 'var(--red)',         shake: false }
-  }
-}
-
-function PaymentConsole({ scenario, runId, reduced, autoplay = false, onNext }:
-  { scenario: ScenarioKey; runId: number; reduced: boolean; autoplay?: boolean; onNext?: () => void }) {
-  const steps = SCENARIOS[scenario]
+function useCycle(length: number, intervalMs = 2800) {
   const [idx, setIdx] = useState(0)
-  const nextRef = useRef(onNext)
-  nextRef.current = onNext
-
   useEffect(() => {
-    if (reduced) { setIdx(steps.length - 1); return }
-    setIdx(0)
-    const timers: ReturnType<typeof setTimeout>[] = []
-    steps.forEach((_, i) => { if (i > 0) timers.push(setTimeout(() => setIdx(i), i * 1100)) })
-    if (autoplay) timers.push(setTimeout(() => nextRef.current?.(), (steps.length - 1) * 1100 + 2800))
-    return () => timers.forEach(clearTimeout)
-  }, [scenario, runId, autoplay, reduced, steps])
+    if (length <= 1) return
+    const timer = setInterval(() => {
+      setIdx((prev) => (prev + 1) % length)
+    }, intervalMs)
+    return () => clearInterval(timer)
+  }, [length, intervalMs])
+  return idx
+}
 
-  const current = steps[idx]
-  const ring = ringState(current, idx)
-  const isTerminal = TERMINAL.includes(current)
-  const failureCode: Record<Status, string | null> = {
-    accepted: null, success: null, failed: 'INSUFFICIENT_FUNDS', cancelled: 'CUSTOMER_CANCELLED', expired: 'CUSTOMER_TIMEOUT',
-  }
+/* ── Mini-App Lifecycle Interactive Simulation ── */
+const MINI_STEPS = [
+  { title: "Customer opens your app", hint: "From the Super App home" },
+  { title: "Validate(token)", hint: "You confirm who is calling" },
+  { title: "Payment (signed)", hint: "Customer confirms with MPIN" },
+]
+const TILES = [Bus, Receipt, Ticket, GraduationCap, null, HeartPulse, Smartphone, ShoppingBag, Coffee]
+const PHONE_STATUS = ["Opening your app", "Customer verified", "Payment confirmed"]
 
+function Steps({ steps, idx }: { steps: typeof MINI_STEPS; idx: number }) {
   return (
-    <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-[var(--shadow-md)] overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)] bg-[var(--surface-2)]">
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-[var(--red)]" />
-          <span className="w-2.5 h-2.5 rounded-full bg-[var(--gray-5)]" />
-          <span className="w-2.5 h-2.5 rounded-full bg-[var(--gray-5)]" />
+    <ol className="space-y-4">
+      {steps.map((s, i) => {
+        const isDone = i < idx
+        const isActive = i === idx
+        return (
+          <li key={s.title} className={`flex items-start gap-3.5 transition-opacity duration-500 ${!isDone && !isActive ? 'opacity-35' : 'opacity-100'}`}>
+            <span className={`mt-0.5 w-6 h-6 shrink-0 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
+              isDone ? 'bg-[var(--text)] text-[var(--surface)]'
+              : isActive ? 'bg-[var(--red)] text-white shadow-sm pg-pulse'
+              : 'border border-[var(--border-strong)] text-[var(--text-3)]'}`}>
+              {isDone ? <Check className="w-3.5 h-3.5" strokeWidth={3} /> : i + 1}
+            </span>
+            <div className="min-w-0">
+              <div className="f-mono text-sm font-semibold text-[var(--text)]">{s.title}</div>
+              <div className="text-xs text-[var(--text-3)] mt-0.5">{s.hint}</div>
+            </div>
+          </li>
+        )
+      })}
+    </ol>
+  )
+}
+
+export function MiniDemo() {
+  const idx = useCycle(MINI_STEPS.length)
+  return (
+    <div className="grid sm:grid-cols-[124px_1fr] gap-6 items-center" aria-hidden="true">
+      {/* Full smartphone: tall screen, status bar, app grid, home indicator */}
+      <div className="relative mx-auto w-[112px] aspect-[9/18.5] rounded-[22px] border-[3px] border-[var(--text)] bg-[var(--surface)] shadow-[var(--shadow-md)] flex flex-col overflow-hidden">
+        <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-9 h-2.5 rounded-full bg-[var(--text)]" />
+        <div className="flex items-center justify-between px-3 pt-1.5 h-6 f-mono text-[7px] text-[var(--text-2)]">
+          <span>9:41</span>
+          <span className="flex items-center gap-0.5">
+            <span className="w-2.5 h-1.5 rounded-[2px] bg-[var(--text-2)]" />
+          </span>
         </div>
-        <span className="f-mono text-[10px] text-[var(--text-4)]">payment-lifecycle.ts</span>
-      </div>
-      <div className="grid sm:grid-cols-[200px_1fr] gap-6 p-6 items-center">
-        <div className="relative w-[180px] h-[180px] sm:w-[200px] sm:h-[200px] mx-auto">
-          <Ring {...ring} />
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-            <span className="f-mono text-[11px] text-[var(--text-3)]">ETB</span>
-            <span className="f-mono text-2xl font-medium text-[var(--text)] -mt-1.5">1,250.00</span>
-            <StatusChip status={current} pulse={!isTerminal} />
+        <div className="px-2.5 pt-1.5">
+          <p className="f-mono text-[8px] text-[var(--text-3)] mb-1.5">Super App</p>
+          <div className="grid grid-cols-3 gap-1.5">
+            {TILES.concat([Coffee, Bus, Receipt]).map((Icon, i) =>
+              Icon ? (
+                <span key={i} className="aspect-square rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text-3)] flex items-center justify-center">
+                  <Icon size={13} strokeWidth={1.8} />
+                </span>
+              ) : (
+                <span key={i} className={`aspect-square rounded-lg bg-[var(--red)] text-white flex items-center justify-center ${idx === 0 ? "pg-pulse" : ""}`}>
+                  <Store size={13} strokeWidth={1.8} />
+                </span>
+              )
+            )}
           </div>
         </div>
-        <ol className="space-y-2.5">
-          {steps.map((s, i) => {
-            const state = i < idx ? 'done' : i === idx ? 'active' : 'pending'
-            return (
-              <li key={s} className={`flex items-start gap-3 transition-opacity duration-500 ${state === 'pending' ? 'opacity-35' : 'opacity-100'}`}>
-                <span className={`mt-0.5 w-5 h-5 shrink-0 rounded-full flex items-center justify-center border transition-colors ${
-                  state === 'done' ? 'bg-[var(--text)] border-[var(--text)] text-[var(--surface)]'
-                  : state === 'active' ? 'border-[var(--red)] text-[var(--red)]'
-                  : 'border-[var(--border-strong)]'}`}>
-                  {state === 'done' ? <Check className="w-3 h-3" strokeWidth={3} />
-                    : state === 'active' ? <span className={`w-2 h-2 rounded-full bg-current ${isTerminal ? '' : 'pg-pulse'}`} />
-                    : null}
-                </span>
-                <div className="min-w-0">
-                  <div className="f-mono text-sm text-[var(--text)]">{s}</div>
-                  <div className="text-xs text-[var(--text-3)]">{STATUS_HINT[s]}</div>
-                </div>
-              </li>
-            )
-          })}
-        </ol>
+        <div className="mt-auto px-2 pb-2">
+          <p className="f-mono text-[7.5px] text-[var(--text)] font-medium text-center mb-1.5 h-3 truncate">{PHONE_STATUS[idx]}</p>
+          <div className="mx-auto w-10 h-0.5 rounded-full bg-[var(--text)]/70" />
+        </div>
       </div>
-      <div className="border-t border-[var(--border)] bg-[var(--surface-2)] px-6 py-4">
-        <pre className="f-mono text-xs leading-relaxed text-[var(--text-2)] overflow-x-auto">
-          {`{\n  "payment_ref": "PAY-20261005-000123",\n  "status": "`}
-          <span style={{ color: `var(--status-${current}-color)`, fontWeight: 500 }}>{current.toUpperCase()}</span>
-          {`",\n  "amount": 1250.00,\n  "currency": "ETB",\n  "failure_code": ${failureCode[current] ? `"${failureCode[current]}"` : 'null'}\n}`}
-        </pre>
-      </div>
+      <Steps steps={MINI_STEPS} idx={idx} />
     </div>
   )
 }
@@ -256,14 +203,6 @@ function Nav() {
 
 /* ── Hero ── */
 function Hero({ reduced }: { reduced: boolean }) {
-  const [scenario, setScenario] = useState<ScenarioKey>('success')
-  const [runId, setRunId] = useState(0)
-
-  const next = () => {
-    setScenario((s) => SCENARIO_ORDER[(SCENARIO_ORDER.indexOf(s) + 1) % SCENARIO_ORDER.length])
-    setRunId((r) => r + 1)
-  }
-
   const onMove = (e: React.MouseEvent<HTMLElement>) => {
     const r = e.currentTarget.getBoundingClientRect()
     e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`)
@@ -279,19 +218,19 @@ function Hero({ reduced }: { reduced: boolean }) {
           className="pg-float f-mono absolute text-[11px] text-[var(--text-4)] select-none hidden md:block"
           style={{ left: f.l, top: f.top, animationDelay: f.d }}>{f.t}</span>
       ))}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1fr_1.05fr] gap-12 lg:gap-10 items-center">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1.1fr_1fr] gap-12 lg:gap-10 items-center">
         <div className="animate-in">
           <div className="f-mono inline-flex items-center gap-2 text-xs text-[var(--text-2)] border border-[var(--border)] bg-[var(--surface)] rounded-md px-3 py-1.5 mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--red)] pg-pulse" />
             ZEMEN BANK · MINI-APP PLATFORM
           </div>
           <h1 className="f-display text-4xl sm:text-5xl lg:text-[3.6rem] font-bold tracking-tight text-[var(--text)] leading-[1.05] mb-6">
-            Every payment,<br />
-            from <span className="text-[var(--red)]">request</span> to{' '}
-            <span className="text-[var(--red)]">receipt.</span>
+            Every Mini-App,<br />
+            from <span className="text-[var(--red)]">sandbox</span> to{' '}
+            <span className="text-[var(--red)]">Super App.</span>
           </h1>
           <p className="text-[var(--text-2)] text-lg mb-8 max-w-lg leading-relaxed">
-            Integrate your Mini-App with Zemen Bank's payment infrastructure. Test in sandbox, go live in days.
+            Integrate your application directly into Zemen Bank. Verify customer identity, accept signed in-app payments, and launch with zero friction.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link href="/developer"
@@ -306,7 +245,17 @@ function Hero({ reduced }: { reduced: boolean }) {
           </div>
         </div>
         <div className="animate-in animate-in-d2">
-          <PaymentConsole scenario={scenario} runId={runId} reduced={reduced} autoplay onNext={next} />
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-[var(--shadow-md)] p-6 sm:p-8">
+            <div className="flex items-center justify-between pb-4 mb-6 border-b border-[var(--border)]">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[var(--red)]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[var(--gray-5)]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[var(--gray-5)]" />
+              </div>
+              <span className="f-mono text-[10px] text-[var(--text-4)]">miniapp-lifecycle.ts</span>
+            </div>
+            <MiniDemo />
+          </div>
         </div>
       </div>
     </section>
@@ -315,12 +264,12 @@ function Hero({ reduced }: { reduced: boolean }) {
 
 /* ── Features ── */
 const FEATURES = [
-  { icon: Zap,       title: 'Instant Integration',  desc: 'Two API calls to initiate a payment. Sandbox ready in minutes with pre-seeded test credentials.' },
-  { icon: Shield,    title: 'Bank-Grade Security',   desc: 'HMAC-SHA256 request signing, AES-GCM encrypted keys, and JWT session tokens.' },
-  { icon: Globe,     title: 'Super App Ecosystem',   desc: 'Your Mini-App lives inside Zemen Bank Super App — 1M+ customers, zero acquisition cost.' },
-  { icon: Terminal,  title: 'Interactive Sandbox',   desc: 'Test all endpoints live in the browser. No account needed. Real callback simulation.' },
-  { icon: Smartphone,title: 'Developer Test APK',   desc: 'Test your mini-app directly on real Android devices using our official sandbox APK.' },
-  { icon: Code,      title: 'Full API Reference',    desc: 'Complete endpoint docs, error codes, HMAC playground, and callback spec in one place.' },
+  { icon: Zap,          title: 'Instant Integration',   desc: 'Two API calls to initiate a payment. Sandbox ready in minutes with pre-seeded test credentials.' },
+  { icon: Shield,       title: 'Bank-Grade Security',    desc: 'HMAC-SHA256 request signing, AES-GCM encrypted keys, and JWT session tokens.' },
+  { icon: Globe,        title: 'Super App Ecosystem',    desc: 'Your Mini-App lives inside Zemen Bank Super App.' },
+  { icon: Terminal,     title: 'Interactive Sandbox',    desc: 'Test all endpoints live in the browser. No account needed. Real callback simulation.' },
+  { icon: Key,          title: 'Developer Portal',       desc: 'Register mini-apps, manage environments, and submit for live deployment.' },
+  { icon: Code,         title: 'Full API Reference',     desc: 'Complete endpoint docs, error codes, HMAC playground, and callback spec in one place.' },
 ]
 
 function Features({ reduced }: { reduced: boolean }) {
@@ -351,10 +300,10 @@ function Features({ reduced }: { reduced: boolean }) {
 
 /* ── How it works ── */
 const STEPS = [
-  { step: '01', title: 'Get Credentials',  desc: 'Register your Mini-App with Zemen Bank. Receive a sandbox API key instantly.' },
-  { step: '02', title: 'Initiate Payment', desc: 'Call POST /Payment with your Mini-App ID, customer phone, and amount. Get a payment token back.' },
-  { step: '03', title: 'Customer Approves',desc: 'Customer approves on the Super App USSD prompt. Accepted status is not final — wait for callback.' },
-  { step: '04', title: 'Get Confirmation', desc: 'Bank sends a signed callback: SUCCESS, FAILED, CANCELLED, or EXPIRED. Done.' },
+  { step: '01', title: 'Register with Zemen', desc: 'Register your Mini-App with Zemen Bank.' },
+  { step: '02', title: 'Validate Customer',  desc: 'When the customer opens your app inside the Super App, validate their signed token via POST /Validate.' },
+  { step: '03', title: 'Initiate Payment',   desc: 'Call POST /Payment with your encrypted payload. Customer approves securely with their banking MPIN.' },
+  { step: '04', title: 'Instant Confirmation', desc: 'Receive immediate cryptographic confirmation and deliver your service seamlessly.' },
 ]
 
 function HowItWorks() {
@@ -365,7 +314,7 @@ function HowItWorks() {
         <div className="text-center mb-14">
           <p className="f-mono text-xs text-[var(--red)] mb-3">HOW IT WORKS</p>
           <h2 className="f-display text-3xl sm:text-4xl font-bold text-[var(--text)] mb-4">Four steps to launch</h2>
-          <p className="text-[var(--text-2)]">From zero to live payments in a single sprint.</p>
+          <p className="text-[var(--text-2)]">From zero to live payments inside the Zemen Super App.</p>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {STEPS.map((s, i) => (
