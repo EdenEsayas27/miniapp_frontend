@@ -156,8 +156,8 @@ function Nav() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-3" aria-label="Zemen Bank Dev Portal">
-            <div className="h-9 w-auto flex items-center justify-center overflow-hidden">
-              <img src="/miniapp/zemen-logo.png" alt="Zemen Bank" className="h-full w-auto" />
+            <div className="h-25 w-auto flex items-center justify-center overflow-hidden">
+              <img src="/miniapp/zemen-bank-logo.png" alt="Zemen Bank" className="h-full w-auto" />
             </div>
             <span className="f-display font-bold text-xl text-[var(--text)] hidden sm:block">Dev Portal</span>
           </Link>
@@ -367,7 +367,7 @@ function Footer() {
     <footer className="border-t border-[var(--border)] py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <img src="/miniapp/zemen-logo.png" alt="Zemen Bank" className="h-7 w-auto" />
+          <img src="/miniapp/zemen-bank-logo.png" alt="Zemen Bank" className="h-20 w-auto" />
           <span className="text-sm text-[var(--text-3)]">© 2026 Zemen Bank S.C.</span>
         </div>
         <div className="flex items-center gap-6 text-sm text-[var(--text-3)]">
